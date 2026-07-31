@@ -33,10 +33,11 @@ export const metadata: Metadata = {
     url: "/",
     siteName,
     images: [{
-      url: "/og.png",
-      width: 1731,
-      height: 909,
-      type: "image/png",
+      url: "/og-share-v2.jpg",
+      secureUrl: "https://cuadra.leo-dev.es/og-share-v2.jpg",
+      width: 1200,
+      height: 630,
+      type: "image/jpeg",
       alt: "Cuadra: cuadrantes claros, sin cuentas y gratis",
     }],
     locale: "es_ES",
@@ -46,7 +47,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title,
     description,
-    images: [{ url: "/og.png", alt: "Cuadra: cuadrantes claros, sin cuentas y gratis" }],
+    images: [{ url: "/og-share-v2.jpg", alt: "Cuadra: cuadrantes claros, sin cuentas y gratis" }],
   },
 };
 

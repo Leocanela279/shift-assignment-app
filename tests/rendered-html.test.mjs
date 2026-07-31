@@ -10,8 +10,11 @@ test("exports the complete Cuadra editor as static HTML", async () => {
   assert.match(html, /<link rel="canonical" href="https:\/\/cuadra\.leo-dev\.es\/"\/>/i);
   assert.match(html, /<meta property="og:url" content="https:\/\/cuadra\.leo-dev\.es\/"\/>/i);
   assert.match(html, /<meta property="og:site_name" content="Cuadra"\/>/i);
-  assert.match(html, /<meta property="og:image" content="https:\/\/cuadra\.leo-dev\.es\/og\.png"\/>/i);
-  assert.match(html, /<meta property="og:image:type" content="image\/png"\/>/i);
+  assert.match(html, /<meta property="og:image" content="https:\/\/cuadra\.leo-dev\.es\/og-share-v2\.jpg"\/>/i);
+  assert.match(html, /<meta property="og:image:secure_url" content="https:\/\/cuadra\.leo-dev\.es\/og-share-v2\.jpg"\/>/i);
+  assert.match(html, /<meta property="og:image:type" content="image\/jpeg"\/>/i);
+  assert.match(html, /<meta property="og:image:width" content="1200"\/>/i);
+  assert.match(html, /<meta property="og:image:height" content="630"\/>/i);
   assert.match(html, /<meta name="twitter:card" content="summary_large_image"\/>/i);
   assert.match(html, /<meta name="robots" content="index, follow"\/>/i);
   assert.match(html, /Saltar al editor/i);
