@@ -216,7 +216,8 @@ button { color: inherit; }
 
 .workspace {
   max-width: 1520px;
-  min-height: 720px;
+  height: clamp(620px, calc(100dvh - 118px), 820px);
+  min-height: 0;
   margin: 0 auto 54px;
   display: grid;
   grid-template-columns: 342px minmax(0, 1fr);
@@ -228,7 +229,10 @@ button { color: inherit; }
 .control-panel {
   border-right: 1px solid var(--ink);
   background: #eee8dc;
-  padding: 24px 22px 18px;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .panel-heading, .schedule-toolbar {
@@ -237,7 +241,13 @@ button { color: inherit; }
   justify-content: space-between;
 }
 
-.panel-heading { margin-bottom: 22px; }
+.panel-heading {
+  flex: 0 0 auto;
+  margin: 0;
+  padding: 24px 22px 18px;
+  border-bottom: 1px solid rgba(23, 34, 56, .16);
+  background: #eee8dc;
+}
 .panel-heading span, .schedule-title > span {
   color: var(--coral-dark);
   font-size: 9px;
@@ -252,7 +262,22 @@ button { color: inherit; }
 }
 
 .mobile-settings-toggle { display: none; }
-.control-content { display: block; }
+.control-content {
+  display: block;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  scrollbar-color: var(--coral) transparent;
+  scrollbar-width: thin;
+  padding: 0 18px 22px 22px;
+}
+
+.control-content::-webkit-scrollbar { width: 9px; }
+.control-content::-webkit-scrollbar-track { background: transparent; }
+.control-content::-webkit-scrollbar-thumb { background: var(--coral); border: 3px solid #eee8dc; }
+.control-content > .field-group:first-child { border-top: 0; }
 
 .field-group {
   border-top: 1px solid rgba(23, 34, 56, .16);
@@ -379,7 +404,7 @@ button { color: inherit; }
 .reset-button { border: 0; background: transparent; color: #77716a; font-size: 10.5px; display: flex; gap: 6px; align-items: center; cursor: pointer; margin: 6px auto 0; }
 .reset-button:hover { color: var(--coral-dark); }
 
-.schedule-area { min-width: 0; padding: 25px 24px 22px; background: var(--paper-light); }
+.schedule-area { min-width: 0; min-height: 0; height: 100%; overflow-y: auto; overscroll-behavior: contain; padding: 25px 24px 22px; background: var(--paper-light); }
 .schedule-toolbar { min-height: 48px; gap: 18px; }
 .schedule-title { display: flex; align-items: center; gap: 15px; }
 .schedule-title > span { writing-mode: vertical-rl; transform: rotate(180deg); padding-right: 7px; border-right: 2px solid var(--coral); }
@@ -516,7 +541,7 @@ footer > span { text-align: right; }
   .topbar-copy { display: none; }
   .workspace { grid-template-columns: 310px minmax(0, 1fr); margin-left: 18px; margin-right: 18px; }
   .intro-band { padding-left: 24px; padding-right: 24px; }
-  .control-panel { padding-inline: 18px; }
+  .panel-heading, .control-content { padding-inline: 18px; }
   .schedule-area { padding-inline: 18px; }
   .schedule-stats span:last-child { display: none; }
   .paint-palette button span { display: none; }
@@ -529,9 +554,9 @@ footer > span { text-align: right; }
   .export-button { height: 38px; padding: 0 11px; }
   .intro-band { display: block; padding: 30px 18px 24px; }
   .intro-band > p { margin-top: 14px; max-width: 600px; }
-  .workspace { display: block; margin: 0 12px 38px; box-shadow: 5px 5px 0 var(--ink); }
-  .control-panel { border-right: 0; border-bottom: 1px solid var(--ink); padding: 0; }
-  .panel-heading { min-height: 66px; margin: 0; padding: 0 18px; }
+  .workspace { display: block; height: auto; min-height: 0; margin: 0 12px 38px; box-shadow: 5px 5px 0 var(--ink); }
+  .control-panel { display: block; overflow: visible; border-right: 0; border-bottom: 1px solid var(--ink); padding: 0; }
+  .panel-heading { min-height: 66px; margin: 0; padding: 0 18px; border-bottom: 0; }
   .panel-heading h2 { font-size: 16px; }
   .desktop-settings-icon { display: none; }
   .mobile-settings-toggle {
@@ -548,9 +573,9 @@ footer > span { text-align: right; }
   }
   .mobile-settings-toggle svg { transition: transform .18s ease; }
   .control-panel.expanded .mobile-settings-toggle svg { transform: rotate(90deg); }
-  .control-content { border-top: 1px solid var(--ink); padding: 0 18px 18px; }
+  .control-content { max-height: none; overflow: visible; border-top: 1px solid var(--ink); padding: 0 18px 18px; scrollbar-gutter: auto; }
   .control-panel.collapsed .control-content { display: none; }
-  .schedule-area { padding: 20px 14px 16px; }
+  .schedule-area { height: auto; overflow: visible; padding: 20px 14px 16px; }
   .employee-list { max-height: 130px; }
   .shift-list { display: grid; grid-template-columns: 1fr 1fr; gap: 9px 14px; }
   .schedule-toolbar { align-items: flex-start; }
