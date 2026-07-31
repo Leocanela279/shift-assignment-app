@@ -1,28 +1,16 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import test from "node:test";
 
-async function render() {
-  const workerUrl = new URL("../dist/server/index.js", import.meta.url);
-  workerUrl.searchParams.set("test", `${process.pid}-${Date.now()}`);
-  const { default: worker } = await import(workerUrl.href);
+test("exports the complete Cuadra editor as static HTML", async () => {
+  const html = await readFile(new URL("../out/index.html", import.meta.url), "utf8");
 
-  return worker.fetch(
-    new Request("http://localhost/", { headers: { accept: "text/html" } }),
-    { ASSETS: { fetch: async () => new Response("Not found", { status: 404 }) } },
-    { waitUntil() {}, passThroughOnException() {} },
-  );
-}
-
-test("server-renders the Cuadra editor", async () => {
-  const response = await render();
-  assert.equal(response.status, 200);
-  assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
-
-  const html = await response.text();
+  assert.match(html, /<html lang="es"/i);
   assert.match(html, /<title>Cuadra — Crea cuadrantes de trabajo gratis<\/title>/i);
   assert.match(html, /Tu equipo,/);
   assert.match(html, /Prepara el cuadrante/);
   assert.match(html, /Descargar PDF/);
+  assert.match(html, /Desarrollado por Leandro Canela/);
   assert.match(html, /Sin registro/i);
   assert.doesNotMatch(html, /codex-preview|SkeletonPreview|react-loading-skeleton/);
 });

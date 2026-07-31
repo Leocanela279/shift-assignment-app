@@ -27,3 +27,6 @@ Para comprobar la versión de producción:
 ```bash
 npm run build
 ```
+
+La compilación genera una web estática en `out/`, lista para Cloudflare Pages.
+Usa `npm run build` como comando de compilación y `out` como directorio de salida.
