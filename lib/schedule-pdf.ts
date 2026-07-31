@@ -69,10 +69,8 @@ export function renderSchedulePdf(doc: jsPDF, options: SchedulePdfOptions) {
 
   for (let page = 0; page < pages; page += 1) {
     if (page > 0) doc.addPage();
-    doc.setFillColor(244, 239, 229);
+    doc.setFillColor(255, 255, 255);
     doc.rect(0, 0, 297, 210, "F");
-    doc.setFillColor(240, 90, 71);
-    doc.rect(0, 0, 5, 210, "F");
 
     let titleX = margin;
     if (logo) {
@@ -84,16 +82,19 @@ export function renderSchedulePdf(doc: jsPDF, options: SchedulePdfOptions) {
         titleX = margin;
       }
     }
-    doc.setTextColor(23, 34, 56);
+    doc.setTextColor(0, 0, 0);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(18);
     doc.text(company || "Mi empresa", titleX, 14);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(10);
     doc.text(`Cuadrante de ${monthLabel}`, titleX, 20);
+    doc.setDrawColor(0, 0, 0);
+    doc.setLineWidth(0.35);
+    doc.line(margin, 25, pageWidth - margin, 25);
 
     const top = 31;
-    doc.setFillColor(23, 34, 56);
+    doc.setFillColor(0, 0, 0);
     doc.rect(margin, top, nameWidth, 11, "F");
     doc.setTextColor(255, 255, 255);
     doc.setFont("helvetica", "bold");
@@ -102,8 +103,7 @@ export function renderSchedulePdf(doc: jsPDF, options: SchedulePdfOptions) {
 
     days.forEach((day, index) => {
       const x = margin + nameWidth + index * dayWidth;
-      if (day.weekend) doc.setFillColor(240, 90, 71);
-      else doc.setFillColor(23, 34, 56);
+      doc.setFillColor(0, 0, 0);
       doc.rect(x, top, dayWidth, 11, "F");
       doc.setTextColor(255, 255, 255);
       doc.setFontSize(6.5);
@@ -115,10 +115,11 @@ export function renderSchedulePdf(doc: jsPDF, options: SchedulePdfOptions) {
     const pageEmployees = employees.slice(page * pageSize, (page + 1) * pageSize);
     pageEmployees.forEach((employee, rowIndex) => {
       const y = top + 11 + rowIndex * rowHeight;
-      doc.setDrawColor(202, 195, 183);
-      doc.setFillColor(rowIndex % 2 === 0 ? 255 : 249, rowIndex % 2 === 0 ? 253 : 247, rowIndex % 2 === 0 ? 249 : 242);
+      doc.setDrawColor(0, 0, 0);
+      doc.setLineWidth(0.15);
+      doc.setFillColor(255, 255, 255);
       doc.rect(margin, y, nameWidth, rowHeight, "FD");
-      doc.setTextColor(23, 34, 56);
+      doc.setTextColor(0, 0, 0);
       doc.setFont("helvetica", "bold");
       doc.setFontSize(7.5);
       doc.text(employee.name.slice(0, 22), margin + 3, y + 5.5);
@@ -129,10 +130,9 @@ export function renderSchedulePdf(doc: jsPDF, options: SchedulePdfOptions) {
         const value = mode === "turnos" ? shiftSchedule[key] : hourSchedule[key];
         const shift = shiftById[value];
         if (mode === "turnos" && shift) doc.setFillColor(shift.color);
-        else if (day.weekend) doc.setFillColor(238, 233, 224);
-        else doc.setFillColor(255, 253, 249);
+        else doc.setFillColor(255, 255, 255);
         doc.rect(x, y, dayWidth, rowHeight, "FD");
-        doc.setTextColor(23, 34, 56);
+        doc.setTextColor(mode === "turnos" && shift ? shift.ink : "#000000");
         doc.setFont("helvetica", "bold");
         doc.setFontSize(mode === "turnos" ? 6.5 : 4.4);
         const printable = mode === "turnos" ? shift?.short ?? "" : value ?? "";
@@ -147,7 +147,7 @@ export function renderSchedulePdf(doc: jsPDF, options: SchedulePdfOptions) {
 
       doc.setFont("helvetica", "bold");
       doc.setFontSize(6.5);
-      doc.setTextColor(90, 86, 80);
+      doc.setTextColor(0, 0, 0);
       doc.text("TURNOS Y HORARIOS", margin, legendTop);
 
       activeShifts.forEach((shift, index) => {
@@ -160,7 +160,7 @@ export function renderSchedulePdf(doc: jsPDF, options: SchedulePdfOptions) {
 
         doc.setFillColor(shift.color);
         doc.roundedRect(x, y - 3.6, 4.5, 4.5, 1, 1, "F");
-        doc.setTextColor(23, 34, 56);
+        doc.setTextColor(0, 0, 0);
         doc.setFont("helvetica", "bold");
         doc.setFontSize(7.2);
         doc.text(label, x + 7, y);
@@ -168,7 +168,7 @@ export function renderSchedulePdf(doc: jsPDF, options: SchedulePdfOptions) {
     }
 
     doc.setFont("helvetica", "normal");
-    doc.setTextColor(90, 86, 80);
+    doc.setTextColor(0, 0, 0);
     doc.setFontSize(6.5);
     doc.text("Creado gratis con Cuadra · cuadra.leo-dev.es", margin, 204);
     if (pages > 1) doc.text(`${page + 1} / ${pages}`, pageWidth - margin, 204, { align: "right" });

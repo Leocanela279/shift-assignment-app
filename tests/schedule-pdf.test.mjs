@@ -17,6 +17,12 @@ const shifts = [
 
 test("renders shift schedules in a legend below the roster", () => {
   const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
+  const fillColors = [];
+  const setFillColor = doc.setFillColor.bind(doc);
+  doc.setFillColor = (...args) => {
+    fillColors.push(args);
+    return setFillColor(...args);
+  };
   const employees = Array.from({ length: 16 }, (_, index) => ({ id: `employee-${index}`, name: `Persona ${index + 1}` }));
 
   const pages = renderSchedulePdf(doc, {
@@ -40,6 +46,12 @@ test("renders shift schedules in a legend below the roster", () => {
   assert.ok(pageCommands.every((page) => !page.includes("Noche")));
   assert.ok(pageCommands.every((page) => !page.includes("23:00 - 07:00")));
   assert.ok(pageCommands.every((page) => page.includes("cuadra.leo-dev.es")));
+  assert.ok(fillColors.every((color) => (
+    color[0] === "#f1cf6a"
+    || color[0] === "#ded9cf"
+    || color.every((channel) => channel === 0)
+    || color.every((channel) => channel === 255)
+  )));
 });
 
 test("omits the shift legend when the roster uses free-form hours", () => {
