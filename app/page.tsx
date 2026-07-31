@@ -132,8 +132,11 @@ export default function Home() {
   const [exporting, setExporting] = useState(false);
   const [toast, setToast] = useState("");
   const [hydrated, setHydrated] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [mobileWeek, setMobileWeek] = useState(0);
   const painting = useRef(false);
   const fileInput = useRef<HTMLInputElement>(null);
+  const swipeStartX = useRef<number | null>(null);
 
   useEffect(() => {
     const restoreDraft = window.requestAnimationFrame(() => {
@@ -188,11 +191,26 @@ export default function Home() {
   }, [month]);
 
   const shiftById = useMemo(() => Object.fromEntries(shifts.map((shift) => [shift.id, shift])), [shifts]);
+  const weekCount = Math.ceil(days.length / 7);
+  const activeWeek = Math.min(mobileWeek, weekCount - 1);
+  const mobileDays = days.slice(activeWeek * 7, activeWeek * 7 + 7);
 
   function changeMonth(offset: number) {
     const [year, monthNumber] = month.split("-").map(Number);
     const next = new Date(year, monthNumber - 1 + offset, 1);
     setMonth(`${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, "0")}`);
+    setMobileWeek(0);
+  }
+
+  function changeMobileWeek(offset: number) {
+    setMobileWeek((current) => Math.max(0, Math.min(weekCount - 1, current + offset)));
+  }
+
+  function finishWeekSwipe(clientX: number) {
+    if (swipeStartX.current === null) return;
+    const distance = clientX - swipeStartX.current;
+    if (Math.abs(distance) > 45) changeMobileWeek(distance < 0 ? 1 : -1);
+    swipeStartX.current = null;
   }
 
   function applyShift(employeeId: string, day: number) {
@@ -392,15 +410,20 @@ export default function Home() {
       </section>
 
       <section className="workspace" id="editor">
-        <aside className="control-panel">
+        <aside className={`control-panel ${settingsOpen ? "expanded" : "collapsed"}`}>
           <div className="panel-heading">
             <div>
               <span>PASO 1</span>
               <h2>Prepara el cuadrante</h2>
             </div>
-            <Settings2 size={21} />
+            <button className="mobile-settings-toggle" onClick={() => setSettingsOpen((current) => !current)} aria-expanded={settingsOpen} aria-controls="schedule-settings">
+              <span>{settingsOpen ? "Cerrar" : "Editar datos"}</span>
+              <ChevronRight size={19} />
+            </button>
+            <Settings2 className="desktop-settings-icon" size={21} />
           </div>
 
+          <div className="control-content" id="schedule-settings">
           <div className="field-group">
             <label htmlFor="company">Nombre de la empresa</label>
             <input id="company" value={company} onChange={(event) => setCompany(event.target.value)} placeholder="Mi empresa" />
@@ -424,7 +447,7 @@ export default function Home() {
             <label htmlFor="month">Mes del cuadrante</label>
             <div className="month-control">
               <button onClick={() => changeMonth(-1)} aria-label="Mes anterior"><ChevronLeft size={18} /></button>
-              <input id="month" type="month" value={month} onChange={(event) => setMonth(event.target.value)} />
+              <input id="month" type="month" value={month} onChange={(event) => { setMonth(event.target.value); setMobileWeek(0); }} />
               <button onClick={() => changeMonth(1)} aria-label="Mes siguiente"><ChevronRight size={18} /></button>
             </div>
           </div>
@@ -485,6 +508,7 @@ export default function Home() {
           </div>
 
           <button className="reset-button" onClick={resetDraft}><RotateCcw size={15} /> Reiniciar ejemplo</button>
+          </div>
         </aside>
 
         <div className="schedule-area">
@@ -576,7 +600,73 @@ export default function Home() {
                 </tbody>
               </table>
             </div>
-            <div className="schedule-footnote"><Info size={15} /> {mode === "turnos" ? "Puedes mantener pulsado y arrastrar para pintar varias casillas." : "Consejo: usa formatos cortos como 9–17 o 10:30–18:30."}</div>
+
+            <div
+              className="mobile-schedule"
+              onTouchStart={(event) => { swipeStartX.current = event.changedTouches[0].clientX; }}
+              onTouchEnd={(event) => finishWeekSwipe(event.changedTouches[0].clientX)}
+            >
+              <div className="mobile-week-nav">
+                <button onClick={() => changeMobileWeek(-1)} disabled={activeWeek === 0} aria-label="Semana anterior"><ChevronLeft size={20} /></button>
+                <div>
+                  <b>Semana {activeWeek + 1} de {weekCount}</b>
+                  <span>{mobileDays[0]?.number}–{mobileDays[mobileDays.length - 1]?.number} de {getMonthLabel(month)}</span>
+                </div>
+                <button onClick={() => changeMobileWeek(1)} disabled={activeWeek === weekCount - 1} aria-label="Semana siguiente"><ChevronRight size={20} /></button>
+              </div>
+
+              <div className="mobile-days-heading" aria-hidden="true">
+                {Array.from({ length: 7 }, (_, index) => mobileDays[index] ?? null).map((day, index) => (
+                  day ? <div className={day.weekend ? "weekend" : ""} key={day.number}><span>{day.weekday}</span><b>{day.number}</b></div> : <div className="blank" key={`blank-${index}`} />
+                ))}
+              </div>
+
+              <div className="mobile-employee-list">
+                {employees.map((employee) => {
+                  const total = days.filter((day) => {
+                    const value = mode === "turnos" ? shiftSchedule[scheduleKey(employee.id, day.number)] : hourSchedule[scheduleKey(employee.id, day.number)];
+                    return value && value !== "L";
+                  }).length;
+                  return (
+                    <article className="mobile-employee-card" key={employee.id}>
+                      <header>
+                        <div><span>{employee.name.slice(0, 1).toUpperCase()}</span><b>{employee.name || "Sin nombre"}</b></div>
+                        <small>{total} días</small>
+                      </header>
+                      <div className="mobile-cells">
+                        {Array.from({ length: 7 }, (_, index) => mobileDays[index] ?? null).map((day, index) => {
+                          if (!day) return <div className="mobile-empty-cell" key={`blank-${index}`} />;
+                          const key = scheduleKey(employee.id, day.number);
+                          const shift = shiftById[shiftSchedule[key]];
+                          return mode === "turnos" ? (
+                            <button
+                              key={day.number}
+                              className={`mobile-shift-cell ${day.weekend ? "weekend" : ""}`}
+                              style={shift ? { background: shift.color, color: shift.ink } : undefined}
+                              onClick={() => applyShift(employee.id, day.number)}
+                              aria-label={`${employee.name}, día ${day.number}: ${shift?.name ?? "vacío"}`}
+                            >{shift?.short || <span>+</span>}</button>
+                          ) : (
+                            <input
+                              key={day.number}
+                              className={`mobile-hour-cell ${day.weekend ? "weekend" : ""}`}
+                              value={hourSchedule[key] ?? ""}
+                              onChange={(event) => setHourSchedule((current) => ({ ...current, [key]: event.target.value }))}
+                              placeholder="—"
+                              aria-label={`Horario de ${employee.name}, día ${day.number}`}
+                            />
+                          );
+                        })}
+                      </div>
+                    </article>
+                  );
+                })}
+                {employees.length === 0 && <div className="mobile-empty-team"><Users size={24} /><b>Añade una persona para empezar</b></div>}
+              </div>
+              <p className="swipe-hint"><ChevronLeft size={13} /> Desliza para cambiar de semana <ChevronRight size={13} /></p>
+            </div>
+
+            <div className="schedule-footnote"><Info size={15} /> <span className="desktop-hint">{mode === "turnos" ? "Puedes mantener pulsado y arrastrar para pintar varias casillas." : "Consejo: usa formatos cortos como 9–17 o 10:30–18:30."}</span><span className="mobile-hint">{mode === "turnos" ? "Selecciona un turno arriba y toca las casillas para aplicarlo." : "Usa formatos cortos como 9–17 para que se lean mejor."}</span></div>
           </div>
 
           <div className="final-action">
