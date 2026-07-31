@@ -679,7 +679,7 @@ export default function Home() {
       <footer>
         <a className="brand footer-brand" href="#editor"><span className="brand-mark" aria-hidden="true"><span /><span /><span /></span><span>CUADRA</span></a>
         <p>Cuadrantes claros para equipos reales.</p>
-        <span>Hecho para compartir · 100% gratuito</span>
+        <span>Desarrollado por Leandro Canela</span>
       </footer>
 
       {toast && <div className="toast" role="status"><Check size={17} /> {toast}</div>}
