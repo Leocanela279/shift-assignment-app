@@ -216,17 +216,20 @@ button { color: inherit; }
 
 .workspace {
   max-width: 1520px;
-  height: clamp(620px, calc(100dvh - 118px), 820px);
-  min-height: 0;
+  min-height: 620px;
   margin: 0 auto 54px;
   display: grid;
   grid-template-columns: 342px minmax(0, 1fr);
-  background: var(--paper-light);
+  background: #eee8dc;
   border: 1px solid var(--ink);
   box-shadow: 8px 8px 0 var(--ink);
 }
 
 .control-panel {
+  position: sticky;
+  top: 12px;
+  align-self: start;
+  height: clamp(620px, calc(100dvh - 24px), 820px);
   border-right: 1px solid var(--ink);
   background: #eee8dc;
   min-height: 0;
@@ -404,7 +407,7 @@ button { color: inherit; }
 .reset-button { border: 0; background: transparent; color: #77716a; font-size: 10.5px; display: flex; gap: 6px; align-items: center; cursor: pointer; margin: 6px auto 0; }
 .reset-button:hover { color: var(--coral-dark); }
 
-.schedule-area { min-width: 0; min-height: 0; height: 100%; overflow-y: auto; overscroll-behavior: contain; padding: 25px 24px 22px; background: var(--paper-light); }
+.schedule-area { min-width: 0; min-height: 100%; margin-left: -1px; border-left: 1px solid var(--ink); padding: 25px 24px 22px; background: var(--paper-light); }
 .schedule-toolbar { min-height: 48px; gap: 18px; }
 .schedule-title { display: flex; align-items: center; gap: 15px; }
 .schedule-title > span { writing-mode: vertical-rl; transform: rotate(180deg); padding-right: 7px; border-right: 2px solid var(--coral); }
@@ -554,8 +557,8 @@ footer > span { text-align: right; }
   .export-button { height: 38px; padding: 0 11px; }
   .intro-band { display: block; padding: 30px 18px 24px; }
   .intro-band > p { margin-top: 14px; max-width: 600px; }
-  .workspace { display: block; height: auto; min-height: 0; margin: 0 12px 38px; box-shadow: 5px 5px 0 var(--ink); }
-  .control-panel { display: block; overflow: visible; border-right: 0; border-bottom: 1px solid var(--ink); padding: 0; }
+  .workspace { display: block; min-height: 0; margin: 0 12px 38px; background: var(--paper-light); box-shadow: 5px 5px 0 var(--ink); }
+  .control-panel { position: static; top: auto; height: auto; display: block; overflow: visible; border-right: 0; border-bottom: 1px solid var(--ink); padding: 0; }
   .panel-heading { min-height: 66px; margin: 0; padding: 0 18px; border-bottom: 0; }
   .panel-heading h2 { font-size: 16px; }
   .desktop-settings-icon { display: none; }
@@ -575,7 +578,7 @@ footer > span { text-align: right; }
   .control-panel.expanded .mobile-settings-toggle svg { transform: rotate(90deg); }
   .control-content { max-height: none; overflow: visible; border-top: 1px solid var(--ink); padding: 0 18px 18px; scrollbar-gutter: auto; }
   .control-panel.collapsed .control-content { display: none; }
-  .schedule-area { height: auto; overflow: visible; padding: 20px 14px 16px; }
+  .schedule-area { min-height: 0; margin-left: 0; border-left: 0; padding: 20px 14px 16px; }
   .employee-list { max-height: 130px; }
   .shift-list { display: grid; grid-template-columns: 1fr 1fr; gap: 9px 14px; }
   .schedule-toolbar { align-items: flex-start; }
