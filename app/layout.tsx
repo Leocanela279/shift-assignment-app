@@ -7,7 +7,7 @@ const sans = DM_Sans({ variable: "--font-sans", subsets: ["latin"] });
 const serif = Instrument_Serif({ variable: "--font-serif", subsets: ["latin"], weight: "400" });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://shift-assignment-app.pages.dev"),
+  metadataBase: new URL("https://cuadra.leo-dev.es"),
   title: "Cuadra — Crea cuadrantes de trabajo gratis",
   description: "Crea cuadrantes por turnos u horarios, personalízalos y descárgalos en PDF. Gratis, sin registro y con tus datos en tu dispositivo.",
   icons: { icon: "/favicon.svg", shortcut: "/favicon.svg" },
