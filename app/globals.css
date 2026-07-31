@@ -345,7 +345,7 @@ button { color: inherit; }
 .shift-row {
   min-height: 34px;
   display: grid;
-  grid-template-columns: 10px 34px 1fr;
+  grid-template-columns: 10px 34px minmax(0, 1fr) 49px;
   align-items: center;
   gap: 5px;
 }
@@ -355,9 +355,12 @@ button { color: inherit; }
 .shift-row input:focus { border-color: var(--ink); }
 .shift-short-input { width: 34px; text-align: center; font-size: 11px; font-weight: 900; padding: 0 3px; }
 .shift-name-input { width: 100%; min-width: 0; padding: 0 7px; font-size: 11px; }
-.shift-time { grid-column: 2 / 4; display: grid; grid-template-columns: 1fr 10px 1fr; align-items: center; gap: 3px; padding-left: 0; }
+.shift-time { grid-column: 2 / 5; display: grid; grid-template-columns: 1fr 10px 1fr; align-items: center; gap: 3px; padding-left: 0; }
 .shift-time input { width: 100%; min-width: 0; text-align: center; font-size: 10px; padding: 0 2px; }
 .shift-time span { text-align: center; color: #999188; }
+.shift-toggle { height: 30px; border: 1px solid var(--ink); background: var(--ink); color: white; padding: 0 4px; font-size: 8px; font-weight: 900; cursor: pointer; }
+.shift-toggle[aria-pressed="false"] { background: transparent; color: var(--ink-soft); border-color: #aaa39a; }
+.shift-row.inactive .shift-color, .shift-row.inactive input, .shift-row.inactive .shift-time { opacity: .42; }
 
 .field-label-row { display: flex; align-items: center; justify-content: space-between; }
 .field-label-row > span:last-child { font-size: 10px; color: #7d7871; }

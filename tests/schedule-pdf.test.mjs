@@ -12,6 +12,7 @@ const days = Array.from({ length: 31 }, (_, index) => ({
 const shifts = [
   { id: "M", name: "Mañana", short: "M", start: "07:00", end: "15:00", color: "#f1cf6a", ink: "#4a3500" },
   { id: "L", name: "Libre", short: "L", start: "", end: "", color: "#ded9cf", ink: "#565049" },
+  { id: "N", name: "Noche", short: "N", start: "23:00", end: "07:00", color: "#9db7dd", ink: "#132f59", enabled: false },
 ];
 
 test("renders shift schedules in a legend below the roster", () => {
@@ -36,6 +37,8 @@ test("renders shift schedules in a legend below the roster", () => {
   assert.ok(pageCommands.every((page) => page.includes("TURNOS Y HORARIOS")));
   assert.ok(pageCommands.every((page) => page.includes("07:00 - 15:00")));
   assert.ok(pageCommands.every((page) => page.includes("Libre")));
+  assert.ok(pageCommands.every((page) => !page.includes("Noche")));
+  assert.ok(pageCommands.every((page) => !page.includes("23:00 - 07:00")));
   assert.ok(pageCommands.every((page) => page.includes("cuadra.leo-dev.es")));
 });
 

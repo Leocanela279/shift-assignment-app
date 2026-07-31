@@ -61,11 +61,11 @@ const MONTHS = [
 ];
 
 const defaultShifts: Shift[] = [
-  { id: "M", name: "Mañana", short: "M", start: "07:00", end: "15:00", color: "#f1cf6a", ink: "#4a3500" },
-  { id: "T", name: "Tarde", short: "T", start: "15:00", end: "23:00", color: "#f18b72", ink: "#5e190d" },
-  { id: "N", name: "Noche", short: "N", start: "23:00", end: "07:00", color: "#9db7dd", ink: "#132f59" },
-  { id: "DC", name: "Día completo", short: "DC", start: "09:00", end: "21:00", color: "#b8d8be", ink: "#183e27" },
-  { id: "L", name: "Libre", short: "L", start: "", end: "", color: "#ded9cf", ink: "#565049" },
+  { id: "M", name: "Mañana", short: "M", start: "07:00", end: "15:00", color: "#f1cf6a", ink: "#4a3500", enabled: true },
+  { id: "T", name: "Tarde", short: "T", start: "15:00", end: "23:00", color: "#f18b72", ink: "#5e190d", enabled: true },
+  { id: "N", name: "Noche", short: "N", start: "23:00", end: "07:00", color: "#9db7dd", ink: "#132f59", enabled: true },
+  { id: "DC", name: "Día completo", short: "DC", start: "09:00", end: "21:00", color: "#b8d8be", ink: "#183e27", enabled: true },
+  { id: "L", name: "Libre", short: "L", start: "", end: "", color: "#ded9cf", ink: "#565049", enabled: true },
 ];
 
 const defaultEmployees: Employee[] = [
@@ -142,7 +142,11 @@ export default function Home() {
           setMode(parsed.mode);
           setLogo(parsed.logo);
           setEmployees(parsed.employees);
-          setShifts(parsed.shifts);
+          const restoredShifts = parsed.shifts.map((shift) => ({ ...shift, enabled: shift.enabled !== false }));
+          setShifts(restoredShifts);
+          setSelectedShift((current) => restoredShifts.some((shift) => shift.id === current && shift.enabled !== false)
+            ? current
+            : restoredShifts.find((shift) => shift.enabled !== false)?.id ?? null);
           setShiftSchedule(parsed.shiftSchedule);
           setHourSchedule(parsed.hourSchedule);
         }
@@ -183,7 +187,8 @@ export default function Home() {
     });
   }, [month]);
 
-  const shiftById = useMemo(() => Object.fromEntries(shifts.map((shift) => [shift.id, shift])), [shifts]);
+  const activeShifts = useMemo(() => shifts.filter((shift) => shift.enabled !== false), [shifts]);
+  const shiftById = useMemo(() => Object.fromEntries(activeShifts.map((shift) => [shift.id, shift])), [activeShifts]);
   const weekCount = Math.ceil(days.length / 7);
   const activeWeek = Math.min(mobileWeek, weekCount - 1);
   const mobileDays = days.slice(activeWeek * 7, activeWeek * 7 + 7);
@@ -225,6 +230,18 @@ export default function Home() {
 
   function updateShift(id: string, field: keyof Shift, value: string) {
     setShifts((current) => current.map((shift) => (shift.id === id ? { ...shift, [field]: value } : shift)));
+  }
+
+  function toggleShift(id: string) {
+    const shift = shifts.find((item) => item.id === id);
+    if (!shift) return;
+    const enabled = shift.enabled === false;
+    const nextShifts = shifts.map((item) => (item.id === id ? { ...item, enabled } : item));
+    setShifts(nextShifts);
+    if (!enabled && selectedShift === id) {
+      setSelectedShift(nextShifts.find((item) => item.enabled !== false)?.id ?? null);
+    }
+    setToast(enabled ? `${shift.name} vuelve a estar disponible` : `${shift.name} se ha ocultado del cuadrante`);
   }
 
   function handleLogo(event: ChangeEvent<HTMLInputElement>) {
@@ -282,7 +299,7 @@ export default function Home() {
   }
 
   const filledCells = mode === "turnos"
-    ? Object.values(shiftSchedule).filter(Boolean).length
+    ? Object.values(shiftSchedule).filter((value) => Boolean(value && shiftById[value])).length
     : Object.values(hourSchedule).filter(Boolean).length;
 
   return (
@@ -376,10 +393,13 @@ export default function Home() {
               <span className="field-label">Define tus turnos</span>
               <div className="shift-list">
                 {shifts.map((shift) => (
-                  <div className="shift-row" key={shift.id}>
+                  <div className={`shift-row ${shift.enabled === false ? "inactive" : ""}`} key={shift.id}>
                     <span className="shift-color" style={{ background: shift.color }} />
                     <input className="shift-short-input" value={shift.short} maxLength={3} onChange={(event) => updateShift(shift.id, "short", event.target.value.toUpperCase())} aria-label={`Sigla de ${shift.name}`} />
                     <input className="shift-name-input" value={shift.name} onChange={(event) => updateShift(shift.id, "name", event.target.value)} aria-label="Nombre del turno" />
+                    <button className="shift-toggle" onClick={() => toggleShift(shift.id)} aria-pressed={shift.enabled !== false} aria-label={`${shift.enabled === false ? "Activar" : "Ocultar"} turno ${shift.name}`}>
+                      {shift.enabled === false ? "Oculto" : "Activo"}
+                    </button>
                     {shift.id !== "L" && (
                       <div className="shift-time">
                         <input type="time" value={shift.start} onChange={(event) => updateShift(shift.id, "start", event.target.value)} aria-label={`Inicio de ${shift.name}`} />
@@ -434,8 +454,8 @@ export default function Home() {
 
           {mode === "turnos" && (
             <div className="paint-palette" role="group" aria-label="Selector de turno">
-              <span>Selecciona y pinta:</span>
-              {shifts.map((shift) => (
+              <span>{activeShifts.length > 0 ? "Selecciona y pinta:" : "Activa un turno para empezar"}</span>
+              {activeShifts.map((shift) => (
                 <button
                   key={shift.id}
                   className={selectedShift === shift.id ? "selected" : ""}
@@ -467,7 +487,7 @@ export default function Home() {
                   {employees.map((employee) => {
                     const total = days.filter((day) => {
                       const value = mode === "turnos" ? shiftSchedule[scheduleKey(employee.id, day.number)] : hourSchedule[scheduleKey(employee.id, day.number)];
-                      return value && value !== "L";
+                      return mode === "turnos" ? Boolean(value && value !== "L" && shiftById[value]) : Boolean(value);
                     }).length;
                     return (
                       <tr key={employee.id}>
@@ -533,7 +553,7 @@ export default function Home() {
                 {employees.map((employee) => {
                   const total = days.filter((day) => {
                     const value = mode === "turnos" ? shiftSchedule[scheduleKey(employee.id, day.number)] : hourSchedule[scheduleKey(employee.id, day.number)];
-                    return value && value !== "L";
+                    return mode === "turnos" ? Boolean(value && value !== "L" && shiftById[value]) : Boolean(value);
                   }).length;
                   return (
                     <article className="mobile-employee-card" key={employee.id}>

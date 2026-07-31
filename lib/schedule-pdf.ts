@@ -10,6 +10,7 @@ export type PdfShift = {
   end: string;
   color: string;
   ink: string;
+  enabled?: boolean;
 };
 
 type PdfEmployee = {
@@ -63,7 +64,8 @@ export function renderSchedulePdf(doc: jsPDF, options: SchedulePdfOptions) {
   const rowHeight = 8.5;
   const pageSize = mode === "turnos" ? 15 : 16;
   const pages = Math.max(1, Math.ceil(employees.length / pageSize));
-  const shiftById = Object.fromEntries(shifts.map((shift) => [shift.id, shift]));
+  const activeShifts = shifts.filter((shift) => shift.enabled !== false);
+  const shiftById = Object.fromEntries(activeShifts.map((shift) => [shift.id, shift]));
 
   for (let page = 0; page < pages; page += 1) {
     if (page > 0) doc.addPage();
@@ -148,7 +150,7 @@ export function renderSchedulePdf(doc: jsPDF, options: SchedulePdfOptions) {
       doc.setTextColor(90, 86, 80);
       doc.text("TURNOS Y HORARIOS", margin, legendTop);
 
-      shifts.forEach((shift, index) => {
+      activeShifts.forEach((shift, index) => {
         const column = index % 3;
         const row = Math.floor(index / 3);
         const x = margin + column * legendColumnWidth;
