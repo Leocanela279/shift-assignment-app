@@ -381,7 +381,8 @@ export default function Home() {
     : Object.values(hourSchedule).filter(Boolean).length;
 
   return (
-    <main className="app-shell">
+    <main className="app-shell" aria-labelledby="page-title">
+      <a className="skip-link" href="#editor">Saltar al editor</a>
       <header className="topbar">
         <a className="brand" href="#editor" aria-label="Cuadra, ir al editor">
           <span className="brand-mark" aria-hidden="true"><span /><span /><span /></span>
@@ -389,11 +390,11 @@ export default function Home() {
           <em>beta</em>
         </a>
         <div className="topbar-copy">
-          <span className="status-dot" />
+          <span className="status-dot" aria-hidden="true" />
           Tu borrador se guarda solo en este dispositivo
         </div>
         <nav className="topbar-actions" aria-label="Acciones del proyecto">
-          <a href="https://github.com/Leocanela279/shift-assignment-app" target="_blank" rel="noreferrer" className="ghost-button"><Code2 size={17} /> Código abierto</a>
+          <a href="https://github.com/Leocanela279/shift-assignment-app" target="_blank" rel="noreferrer" className="ghost-button" aria-label="Ver el código abierto en GitHub; se abre en una pestaña nueva"><Code2 size={17} /> Código abierto</a>
           <button className="export-button" onClick={exportPdf} disabled={exporting}>
             {exporting ? <span className="spinner" /> : <ArrowDownToLine size={18} />}
             {exporting ? "Preparando…" : "Descargar PDF"}
@@ -401,15 +402,15 @@ export default function Home() {
         </nav>
       </header>
 
-      <section className="intro-band">
+      <section className="intro-band" aria-labelledby="page-title">
         <div>
           <p className="eyebrow"><Sparkles size={14} /> SIN REGISTRO · GRATIS · OPEN SOURCE</p>
-          <h1>Tu equipo, <span>bien cuadrado.</span></h1>
+          <h1 id="page-title">Tu equipo, <span>bien cuadrado.</span></h1>
         </div>
         <p>Configura, reparte turnos y llévate un PDF listo para imprimir. Sin cuentas, sin plantillas eternas.</p>
       </section>
 
-      <section className="workspace" id="editor">
+      <section className="workspace" id="editor" aria-label="Editor de cuadrantes">
         <aside className={`control-panel ${settingsOpen ? "expanded" : "collapsed"}`}>
           <div className="panel-heading">
             <div>
@@ -454,11 +455,11 @@ export default function Home() {
 
           <div className="field-group mode-group">
             <span className="field-label">¿Cómo quieres rellenarlo?</span>
-            <div className="mode-switch" role="tablist" aria-label="Formato del cuadrante">
-              <button className={mode === "turnos" ? "active" : ""} onClick={() => setMode("turnos")} role="tab" aria-selected={mode === "turnos"}>
+            <div className="mode-switch" role="radiogroup" aria-label="Formato del cuadrante">
+              <button className={mode === "turnos" ? "active" : ""} onClick={() => setMode("turnos")} role="radio" aria-checked={mode === "turnos"}>
                 <CalendarDays size={17} /> Por turnos
               </button>
-              <button className={mode === "horas" ? "active" : ""} onClick={() => setMode("horas")} role="tab" aria-selected={mode === "horas"}>
+              <button className={mode === "horas" ? "active" : ""} onClick={() => setMode("horas")} role="radio" aria-checked={mode === "horas"}>
                 <Clock3 size={17} /> Por horas
               </button>
             </div>
@@ -527,13 +528,14 @@ export default function Home() {
           </div>
 
           {mode === "turnos" && (
-            <div className="paint-palette" aria-label="Selector de turno">
+            <div className="paint-palette" role="group" aria-label="Selector de turno">
               <span>Selecciona y pinta:</span>
               {shifts.map((shift) => (
                 <button
                   key={shift.id}
                   className={selectedShift === shift.id ? "selected" : ""}
                   onClick={() => setSelectedShift(shift.id)}
+                  aria-pressed={selectedShift === shift.id}
                   style={{ "--shift-color": shift.color, "--shift-ink": shift.ink } as React.CSSProperties}
                 >
                   <b>{shift.short}</b>
@@ -541,13 +543,14 @@ export default function Home() {
                   {selectedShift === shift.id && <Check size={14} />}
                 </button>
               ))}
-              <button className={`eraser ${selectedShift === null ? "selected" : ""}`} onClick={() => setSelectedShift(null)}><Eraser size={15} /> Borrar</button>
+              <button className={`eraser ${selectedShift === null ? "selected" : ""}`} onClick={() => setSelectedShift(null)} aria-pressed={selectedShift === null}><Eraser size={15} /> Borrar</button>
             </div>
           )}
 
           <div className="schedule-card">
             <div className="table-scroll">
               <table className="schedule-table">
+                <caption className="sr-only">Cuadrante de {getMonthLabel(month)} para {company || "Mi empresa"}</caption>
                 <thead>
                   <tr>
                     <th className="employee-heading">PERSONA</th>
@@ -677,7 +680,7 @@ export default function Home() {
       </section>
 
       <footer>
-        <a className="brand footer-brand" href="#editor"><span className="brand-mark" aria-hidden="true"><span /><span /><span /></span><span>CUADRA</span></a>
+        <a className="brand footer-brand" href="#editor" aria-label="Cuadra, volver al editor"><span className="brand-mark" aria-hidden="true"><span /><span /><span /></span><span>CUADRA</span></a>
         <p>Cuadrantes claros para equipos reales.</p>
         <span>Desarrollado por Leandro Canela</span>
       </footer>
